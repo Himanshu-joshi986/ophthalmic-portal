@@ -500,22 +500,33 @@ function PaymentPage({ user, profile, onSuccess }) {
   }
 
   async function handlePayment() {
-    if (!BACKEND_URL) {
-      setMsg({ type: "error", text: "Configuration error: VITE_BACKEND_URL is not set in environment variables." });
+    if (!BACKEND_URL || !RAZORPAY_KEY_ID) {
+      const missing = !BACKEND_URL ? "VITE_BACKEND_URL" : "VITE_RAZORPAY_KEY_ID";
+      setMsg({ type: "error", text: `Configuration error: ${missing} is not set in Vercel environment variables.` });
       return;
     }
     setLoading(true);
     setMsg(null);
     try {
+      // Ensure no trailing slash in BACKEND_URL
+      const cleanBackendUrl = BACKEND_URL.replace(/\/$/, "");
+
       // Call backend to create Razorpay order
-      const res = await fetch(`${BACKEND_URL}/api/payment/create-order`, {
+      const res = await fetch(`${cleanBackendUrl}/api/payment/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: user.id, email: user.email, amount: PAYMENT_AMOUNT })
       });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        let errorJson;
+        try { errorJson = JSON.parse(errorText); } catch (e) { /* not json */ }
+        throw new Error(errorJson?.error || `Server error: ${res.status} ${res.statusText}`);
+      }
+
       const order = await res.json();
-      if (order.error) throw new Error(order.error);
-      if (!order.id) throw new Error("Could not create payment order. Please try again.");
+      if (!order.id) throw new Error("Could not create payment order. Please check your backend logs.");
 
       loadRazorpay(() => {
         const rzp = new window.Razorpay({
