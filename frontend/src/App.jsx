@@ -511,10 +511,11 @@ function PaymentPage({ user, profile, onSuccess }) {
       const res = await fetch(`${BACKEND_URL}/api/payment/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: user.id, amount: PAYMENT_AMOUNT })
+        body: JSON.stringify({ user_id: user.id, email: user.email, amount: PAYMENT_AMOUNT })
       });
       const order = await res.json();
-      if (!order.id) throw new Error("Failed to create payment order");
+      if (order.error) throw new Error(order.error);
+      if (!order.id) throw new Error("Could not create payment order. Please try again.");
 
       loadRazorpay(() => {
         const rzp = new window.Razorpay({

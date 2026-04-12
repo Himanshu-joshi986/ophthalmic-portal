@@ -51,25 +51,52 @@ app.post("/api/payment/create-order", async (req, res) => {
 
   try {
     // Check if user exists and hasn't already paid
-    const { data: user, error: userErr } = await supabase
+    let { data: user, error: userErr } = await supabase
       .from("users").select("id, payment_status").eq("id", user_id).single();
-    if (userErr || !user) return res.status(404).json({ error: "User not found" });
+
+    // If user record doesn't exist in our table (but they are logged in via Supabase Auth)
+    if (userErr && userErr.code === "PGRST116") {
+      console.log("User record missing, creating for:", user_id);
+      const { data: newUser, error: createErr } = await supabase.from("users").insert({
+        id: user_id,
+        email: req.body.email || "unknown@example.com", // frontend should ideally send email
+        payment_status: "pending"
+      }).select().single();
+
+      if (createErr) {
+        console.error("Failed to auto-create user:", createErr);
+        return res.status(500).json({ error: "Database error: Could not create user profile." });
+      }
+      user = newUser;
+    } else if (userErr || !user) {
+      console.error("User check error:", userErr);
+      return res.status(404).json({ error: "User profile not found. Please try logging out and back in." });
+    }
+
     if (user.payment_status === "success") return res.status(400).json({ error: "Already paid" });
 
     // Create Razorpay order
+    console.log("Creating Razorpay order for user:", user_id);
     const order = await razorpay.orders.create({
       amount: PAYMENT_AMOUNT,
       currency: "INR",
       receipt: `receipt_${user_id.slice(0, 8)}_${Date.now()}`,
+    }).catch(err => {
+      console.error("Razorpay order error:", err);
+      throw new Error(`Razorpay Error: ${err.description || err.message}`);
     });
 
     // Save order to DB
-    await supabase.from("payments").insert({
+    const { error: insertErr } = await supabase.from("payments").insert({
       user_id,
       order_id: order.id,
       amount: PAYMENT_AMOUNT,
       status: "created",
     });
+    if (insertErr) {
+      console.error("Insert payment error:", insertErr);
+      throw new Error("Failed to save order to the database.");
+    }
 
     res.json({ id: order.id, amount: order.amount, currency: order.currency });
   } catch (err) {
