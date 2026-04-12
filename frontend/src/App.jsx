@@ -2,13 +2,13 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 // ============================================================
-// CONFIG - Replace with your actual keys
+// CONFIG - Set in Vercel Environment Variables
 // ============================================================
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://iagmjzmicsrilwvqbuxj.supabase.co";
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "YeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZ21qem1pY3NyaWx3dnFidXhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDEzMjksImV4cCI6MjA5MTU3NzMyOX0.mDUAbQGOPjCMbHuULjFtwccjSyMSLYBzRefJKx3Fd7Y";
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SZbV3nEkDMa9XR";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
 const PAYMENT_AMOUNT = parseInt(import.meta.env.VITE_PAYMENT_AMOUNT || "50000");
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://ophthalmic-portal.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

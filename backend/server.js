@@ -33,6 +33,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 // ============================================================
 // HEALTH CHECK
 // ============================================================
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 // ============================================================

@@ -75,20 +75,7 @@ Government Officers Ease/
 
 ---
 
-## STEP 4: FRONTEND CONFIGURATION
-
-Open `src/App.jsx` and update the CONFIG section at the top:
-
-```javascript
-const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";      // From Step 1
-const SUPABASE_ANON_KEY = "eyJhbGc...";                        // From Step 1
-const RAZORPAY_KEY_ID = "rzp_live_YOUR_KEY";                   // From Step 2
-const BACKEND_URL = "https://ophthalmic-backend.onrender.com"; // From Step 3
-```
-
----
-
-## STEP 5: FRONTEND DEPLOYMENT (Vercel — Free)
+## STEP 4: FRONTEND DEPLOYMENT (Vercel — Free)
 
 1. Push the entire project to GitHub
 2. Go to https://vercel.com → Create free account
@@ -98,7 +85,14 @@ const BACKEND_URL = "https://ophthalmic-backend.onrender.com"; // From Step 3
    - **Root Directory:** `frontend`
    - **Build Command:** `npm run build`
    - **Output Directory:** `dist`
-5. No environment variables needed (already in App.jsx)
+5. Add **Environment Variables** (IMPORTANT: must start with `VITE_`):
+   ```
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-public-key
+   VITE_RAZORPAY_KEY_ID=rzp_test_your-key-id
+   VITE_BACKEND_URL=https://ophthalmic-backend.onrender.com
+   VITE_PAYMENT_AMOUNT=50000
+   ```
 6. Click **Deploy**
 7. Get URL: `https://ophthalmic-portal.vercel.app`
 
