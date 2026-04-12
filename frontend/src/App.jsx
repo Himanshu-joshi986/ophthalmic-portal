@@ -303,7 +303,7 @@ function AuthPage({ onAuth }) {
             profile_completed: false,
             payment_status: "pending"
           });
-          setMsg({ type: "success", text: "Account created! Please log in." });
+          setMsg({ type: "success", text: "Account created! Please check your email for a verification link, then log in." });
           setMode("login");
         }
       }
@@ -500,6 +500,10 @@ function PaymentPage({ user, profile, onSuccess }) {
   }
 
   async function handlePayment() {
+    if (!BACKEND_URL) {
+      setMsg({ type: "error", text: "Configuration error: VITE_BACKEND_URL is not set in environment variables." });
+      return;
+    }
     setLoading(true);
     setMsg(null);
     try {
@@ -962,15 +966,28 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [globalMsg, setGlobalMsg] = useState(null);
 
   useEffect(() => {
+    // Check URL for verification status
+    if (window.location.hash.includes("type=signup") || window.location.hash.includes("type=recovery")) {
+      setGlobalMsg({ type: "success", text: "Email verified successfully! You are now logged in." });
+      // Clean the hash from the URL
+      window.history.replaceState(null, null, " ");
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) loadProfile(session.user.id);
       else setLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (event === "SIGNED_IN") {
+        if (window.location.hash.includes("type=signup")) {
+          setGlobalMsg({ type: "success", text: "Welcome! Your email has been verified." });
+        }
+      }
       if (session) loadProfile(session.user.id);
       else { setProfile(null); setLoading(false); }
     });
@@ -999,14 +1016,29 @@ export default function App() {
 
   // Profile not completed
   if (!profile || !profile.profile_completed) {
-    return <ProfileSetupPage user={session.user} onComplete={p => setProfile({ ...profile, ...p, profile_completed: true })} />;
+    return (
+      <>
+        {globalMsg && <div style={{ position: "fixed", top: 20, right: 20, zIndex: 1000 }}><Alert type={globalMsg.type} msg={globalMsg.text} /></div>}
+        <ProfileSetupPage user={session.user} onComplete={p => setProfile({ ...profile, ...p, profile_completed: true })} />
+      </>
+    );
   }
 
   // Payment pending
   if (profile.payment_status !== "success") {
-    return <PaymentPage user={session.user} profile={profile} onSuccess={() => setProfile({ ...profile, payment_status: "success" })} />;
+    return (
+      <>
+        {globalMsg && <div style={{ position: "fixed", top: 20, right: 20, zIndex: 1000 }}><Alert type={globalMsg.type} msg={globalMsg.text} /></div>}
+        <PaymentPage user={session.user} profile={profile} onSuccess={() => setProfile({ ...profile, payment_status: "success" })} />
+      </>
+    );
   }
 
   // Full access
-  return <Dashboard user={session.user} profile={profile} />;
+  return (
+    <>
+      {globalMsg && <div style={{ position: "fixed", top: 20, right: 20, zIndex: 1000 }}><Alert type={globalMsg.type} msg={globalMsg.text} /></div>}
+      <Dashboard user={session.user} profile={profile} />
+    </>
+  );
 }

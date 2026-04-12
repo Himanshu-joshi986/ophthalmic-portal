@@ -11,7 +11,11 @@ const Razorpay = require("razorpay");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
+app.use(cors({
+  origin: ["https://ophthalmic-portal.vercel.app", "http://localhost:5173"],
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json());
 
 // ============================================================
