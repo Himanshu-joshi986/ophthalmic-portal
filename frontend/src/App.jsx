@@ -199,7 +199,10 @@ function generateMonitoringHTML(profile, month, year, data, prog) {
   const H = (txt, rs=1, cs=1) => `<th style="border:1px solid #000;font-size:8px;text-align:center;padding:2px;vertical-align:middle;font-weight:700;" ${rs>1?`rowspan="${rs}"`:""} ${cs>1?`colspan="${cs}"`:""}>${txt}</th>`;
   const HV = (txt, rs=1, cs=1) => `<th style="border:1px solid #000;font-size:8px;text-align:center;padding:2px;vertical-align:middle;font-weight:700;height:90px;" ${rs>1?`rowspan="${rs}"`:""} ${cs>1?`colspan="${cs}"`:""}><div style="writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;margin:0 auto;padding:2px;">${txt}</div></th>`;
 
-  const dataCell = (val, bg="") => `<td style="border:1px solid #000;text-align:center;padding:4px 2px;font-size:10px;font-weight:600;${bg?`background:${bg}`:""}">${pad(val)}</td>`;
+  const dataCell = (val, bg="") => {
+    const displayVal = val === "" ? "" : pad(val);
+    return `<td style="border:1px solid #000;text-align:center;padding:4px 2px;font-size:10px;font-weight:600;${bg?`background:${bg}`:""}">${displayVal}</td>`;
+  };
   const staticCell = (val) => `<td style="border:1px solid #000;text-align:center;padding:4px 2px;font-size:10px;font-weight:600;">${val}</td>`;
 
   const officerCells = (d, totalOps) =>
