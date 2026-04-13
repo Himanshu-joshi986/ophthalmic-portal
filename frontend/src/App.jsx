@@ -204,7 +204,7 @@ function generateMonitoringHTML(profile, month, year, data, prog) {
 
   const officerCells = (d, totalOps) =>
     [d.total_patient_seen, d.refractive_error_corrected,
-     d.cataract_detected, totalOps, "-", // Patient still on waiting list
+     d.cataract_detected, totalOps, "", // Patient still on waiting list (blank)
      d.students_examined, d.refractive_error_detected, d.spectacle_students, 0,
      0, d.suspect_glaucoma, d.students_squint, 0
     ].map(v => dataCell(v)).join("");
@@ -263,9 +263,9 @@ function generateMonitoringHTML(profile, month, year, data, prog) {
         <td style="border:1px solid #000;text-align:center;padding:4px 2px;font-size:10px;font-weight:600;">1</td>
         <td style="border:1px solid #000;padding:4px 6px;font-weight:700;font-size:10px;text-align:left;">${(profile.name||"").toUpperCase()}</td>
         <td style="border:1px solid #000;padding:4px 6px;font-size:9px;text-align:left;">${(profile.phc||"").toUpperCase()}</td>
-        ${staticCell("-")} <!-- OO trained in Enucleation -->
+        ${staticCell("")} <!-- OO trained in Enucleation (blank) -->
         <td style="border:1px solid #000;padding:4px 6px;font-size:9px;text-align:left;">${(profile.phc||"").toUpperCase()}</td>
-        ${staticCell("-")} <!-- Population covered -->
+        ${staticCell("")} <!-- Population covered (blank) -->
         ${staticCell("Yes")} <!-- Survey status -->
         ${officerCells(data, totalDM)}
       </tr>
