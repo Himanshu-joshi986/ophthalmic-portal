@@ -526,12 +526,29 @@ function Dashboard({user,profile}){
   }
 
   async function saveEntry(formData){
-    const existing=allData.find(d=>d.month===selectedMonth);
-    const yr=selectedMonth>=4?parseInt(currentFY.split("-")[0]):parseInt(currentFY.split("-")[0])+1;
+    // Default empty fields to 0
+    const sanitizedData = { ...formData };
+    Object.keys(EMPTY_FORM).forEach(key => {
+      if (sanitizedData[key] === "" || sanitizedData[key] === null || sanitizedData[key] === undefined) {
+        sanitizedData[key] = 0;
+      }
+    });
+
+    const existing = allData.find(d => d.month === selectedMonth);
+    const yr = selectedMonth >= 4 ? parseInt(currentFY.split("-")[0]) : parseInt(currentFY.split("-")[0]) + 1;
     let error;
-    if(existing){({error}=await supabase.from("monthly_data").update({...formData,updated_at:new Date().toISOString()}).eq("id",existing.id));}
-    else{({error}=await supabase.from("monthly_data").insert({user_id:user.id,month:selectedMonth,year:yr,financial_year:currentFY,...formData}));}
-    if(!error){await loadData();setPage("home");}
+    if (existing) {
+      ({ error } = await supabase.from("monthly_data").update({ ...sanitizedData, updated_at: new Date().toISOString() }).eq("id", existing.id));
+    } else {
+      ({ error } = await supabase.from("monthly_data").insert({
+        user_id: user.id,
+        month: selectedMonth,
+        year: yr,
+        financial_year: currentFY,
+        ...sanitizedData
+      }));
+    }
+    if (!error) { await loadData(); setPage("home"); }
     return error;
   }
 
