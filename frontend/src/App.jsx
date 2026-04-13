@@ -197,29 +197,31 @@ function generateMonitoringHTML(profile, month, year, data, prog) {
   const totalPR = (parseInt(prog.op_rh_sdh_iol)||0)+(parseInt(prog.op_dh_iol)||0)+(parseInt(prog.op_elsewhere_iol)||0);
 
   const H = (txt, rs=1, cs=1) => `<th style="border:1px solid #000;font-size:8px;text-align:center;padding:2px;vertical-align:middle;font-weight:700;" ${rs>1?`rowspan="${rs}"`:""} ${cs>1?`colspan="${cs}"`:""}>${txt}</th>`;
-  const HV = (txt, rs=1, cs=1) => `<th style="border:1px solid #000;font-size:8px;text-align:center;padding:2px;vertical-align:middle;font-weight:700;height:80px;" ${rs>1?`rowspan="${rs}"`:""} ${cs>1?`colspan="${cs}"`:""}><div style="writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;margin:0 auto;">${txt}</div></th>`;
+  const HV = (txt, rs=1, cs=1) => `<th style="border:1px solid #000;font-size:8px;text-align:center;padding:2px;vertical-align:middle;font-weight:700;height:90px;" ${rs>1?`rowspan="${rs}"`:""} ${cs>1?`colspan="${cs}"`:""}><div style="writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;margin:0 auto;padding:2px;">${txt}</div></th>`;
 
-  const dataCell = (val, bg="") => `<td style="border:1px solid #000;text-align:center;padding:2px;font-size:10px;font-weight:500;${bg?`background:${bg}`:""}">${pad(val)}</td>`;
+  const dataCell = (val, bg="") => `<td style="border:1px solid #000;text-align:center;padding:4px 2px;font-size:10px;font-weight:600;${bg?`background:${bg}`:""}">${pad(val)}</td>`;
+  const staticCell = (val) => `<td style="border:1px solid #000;text-align:center;padding:4px 2px;font-size:10px;font-weight:600;">${val}</td>`;
 
-  const officerCells = (d, totalOps, bg="") =>
+  const officerCells = (d, totalOps) =>
     [d.total_patient_seen, d.refractive_error_corrected,
-     d.cataract_detected, totalOps, 0,
+     d.cataract_detected, totalOps, "-", // Patient still on waiting list
      d.students_examined, d.refractive_error_detected, d.spectacle_students, 0,
      0, d.suspect_glaucoma, d.students_squint, 0
-    ].map(v => dataCell(v, bg)).join("");
+    ].map(v => dataCell(v)).join("");
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:Arial,sans-serif;font-size:9px;background:white;color:#000;}
-  .page{width:297mm;min-height:210mm;padding:10mm 10mm;}
+  .page{width:297mm;min-height:210mm;padding:12mm 8mm;}
   table{width:100%;border-collapse:collapse;table-layout:fixed;}
+  th, td { overflow: hidden; word-wrap: break-word; }
   @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}@page{size:A4 landscape;margin:0;}}
 </style></head><body><div class="page">
 
-  <div style="text-align:center;margin-bottom:12px;">
-    <div style="font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:15px;">MONITORING OF ACTIVITIES OF OPHTHALMIC OFFICERS</div>
-    <div style="display:flex;justify-content:space-between;padding:0 5px;font-size:12px;font-weight:600;">
+  <div style="text-align:center;margin-bottom:15px;">
+    <div style="font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;">MONITORING OF ACTIVITIES OF OPHTHALMIC OFFICERS</div>
+    <div style="display:flex;justify-content:space-between;padding:0 5px;font-size:13px;font-weight:700;">
       <span>Name of district- ${profile.district}</span>
       <span>MONTH- ${getMonthName(month).toUpperCase()} ${year}</span>
     </div>
@@ -228,18 +230,17 @@ function generateMonitoringHTML(profile, month, year, data, prog) {
   <table>
     <thead>
       <tr>
-        ${H("Sr.no",2)}
-        ${H("Name of Ophthalmic Officer",2)}
-        ${H("Head Quarter/<br>Working Station",2)}
-        ${H("OO trained in<br>Enucleation YES/No",2)}
-        ${H("Place of Posting",2)}
+        <th style="border:1px solid #000;width:30px;font-size:8px;font-weight:700;" rowspan="2">Sr.no</th>
+        <th style="border:1px solid #000;width:120px;font-size:8px;font-weight:700;" rowspan="2">Name of Ophthalmic Officer</th>
+        <th style="border:1px solid #000;width:90px;font-size:8px;font-weight:700;" rowspan="2">Head Quarter/<br>Working Station</th>
+        <th style="border:1px solid #000;width:70px;font-size:8px;font-weight:700;" rowspan="2">OO trained in<br>Enucleation YES/No</th>
+        <th style="border:1px solid #000;width:90px;font-size:8px;font-weight:700;" rowspan="2">Place of Posting</th>
         ${HV("Population covered",2)}
         ${HV("Survey status Yes/NO",2)}
         ${H("OPD",1,2)}
         ${H("CATARACT",1,3)}
         ${H("SCHOOL EYE SCREENING",1,4)}
         ${H("Other eye diseases",1,4)}
-        ${H("",2)}
       </tr>
       <tr>
         ${H("No. of patient<br>examined in the<br>month")}
@@ -259,35 +260,30 @@ function generateMonitoringHTML(profile, month, year, data, prog) {
     </thead>
     <tbody>
       <tr>
-        <td style="border:1px solid #000;text-align:center;padding:2px;" rowspan="2">1</td>
-        <td style="border:1px solid #000;padding:2px 4px;font-weight:600;font-size:9px;" rowspan="2">${(profile.name||"").toUpperCase()}</td>
-        <td style="border:1px solid #000;padding:2px 4px;font-size:8px;" rowspan="2">${(profile.phc||"").toUpperCase()}</td>
-        <td style="border:1px solid #000;text-align:center;padding:2px;font-size:9px;" rowspan="2">NO</td>
-        <td style="border:1px solid #000;padding:2px 4px;font-size:8px;" rowspan="2">PHC ${(profile.phc||"").toUpperCase()}</td>
-        <td style="border:1px solid #000;text-align:center;padding:2px;font-size:9px;" rowspan="2">.</td>
-        <td style="border:1px solid #000;text-align:center;padding:2px;font-weight:600;" rowspan="2">Yes</td>
+        <td style="border:1px solid #000;text-align:center;padding:4px 2px;font-size:10px;font-weight:600;">1</td>
+        <td style="border:1px solid #000;padding:4px 6px;font-weight:700;font-size:10px;text-align:left;">${(profile.name||"").toUpperCase()}</td>
+        <td style="border:1px solid #000;padding:4px 6px;font-size:9px;text-align:left;">${(profile.phc||"").toUpperCase()}</td>
+        ${staticCell("-")} <!-- OO trained in Enucleation -->
+        <td style="border:1px solid #000;padding:4px 6px;font-size:9px;text-align:left;">${(profile.phc||"").toUpperCase()}</td>
+        ${staticCell("-")} <!-- Population covered -->
+        ${staticCell("Yes")} <!-- Survey status -->
         ${officerCells(data, totalDM)}
-        <td style="border:1px solid #000;text-align:center;font-size:8px;font-weight:700;padding:2px;">Month</td>
       </tr>
-      <tr style="background:#f9f9f9;">
-        ${officerCells(prog, totalPR)}
-        <td style="border:1px solid #000;text-align:center;font-size:8px;font-weight:700;padding:2px;">Prog.</td>
-      </tr>
-      ${[2,3,4,5,6,7,8,9,10,11,12].map(n=>`
-      <tr style="height:22px;">
-        <td style="border:1px solid #000;text-align:center;">${n}</td>
-        ${Array(20).fill('<td style="border:1px solid #000;"></td>').join("")}
+      ${[2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`
+      <tr style="height:28px;">
+        <td style="border:1px solid #000;text-align:center;font-size:10px;font-weight:600;">${n}</td>
+        ${Array(19).fill('<td style="border:1px solid #000;"></td>').join("")}
       </tr>`).join("")}
     </tbody>
   </table>
 
-  <div style="margin-top:40px;display:flex;justify-content:space-around;padding:0 50px;">
-    <div style="text-align:center;font-size:11px;font-weight:700;">
-      <div style="margin-bottom:25px;">MEDICAL OFFICER</div>
+  <div style="margin-top:50px;display:flex;justify-content:space-around;padding:0 40px;">
+    <div style="text-align:center;font-size:12px;font-weight:700;">
+      <div style="margin-bottom:30px;">MEDICAL OFFICER</div>
       <div>DIST- ${(profile.district||"").toUpperCase()}</div>
     </div>
-    <div style="text-align:center;font-size:11px;font-weight:700;">
-      <div style="margin-bottom:25px;">OPHTHALMIC OFFICER</div>
+    <div style="text-align:center;font-size:12px;font-weight:700;">
+      <div style="margin-bottom:30px;">OPHTHALMIC OFFICER</div>
       <div>DIST- ${(profile.district||"").toUpperCase()}</div>
     </div>
   </div>
